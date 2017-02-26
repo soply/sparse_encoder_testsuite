@@ -1,4 +1,8 @@
 #coding: utf8
+""" Least squares regression utility methods """
+
+__author__ = "Timo Klock"
+
 import numpy as np
 from pykrylov.lls import LSMRFramework
 

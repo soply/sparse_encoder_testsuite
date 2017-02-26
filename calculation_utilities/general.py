@@ -1,4 +1,8 @@
-#coding: utf8
+# coding: utf8
+""" General utility methods """
+
+__author__ = "Timo Klock"
+
 import numpy as np
 
 

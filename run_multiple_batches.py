@@ -41,7 +41,8 @@ def run_numerous_multiple_constellations(problem):
         'noise_lev_signal': 0.3,
         'noise_type_measurements': 'gaussian',
         'noise_lev_measurements': 0.0,
-        'random_seed': 1
+        'random_seed': 1,
+        'verbosity' : False
     }
     'run_numerous_multiple_constellations(problem)'
 
@@ -52,8 +53,8 @@ def run_numerous_multiple_constellations(problem):
 
     Remarks
     ----------------
-    a) 'method' and 'identifier' are not allowed to be lists. They are equal for
-       all runs.
+    a) 'method', 'identifier' and 'verbosity' are not allowed to be lists. They
+        are equal for all runs.
 
     b) Please consult the docs of 'run_batch.run_numerous_one_constellation' for
        more information on the problem dictionary.
@@ -66,7 +67,6 @@ def run_numerous_multiple_constellations(problem):
             if listsize == 1:
                 # No list found in dict so far. Set dictsize
                 listsize = len(val)
-                print key, listsize
             elif len(val) != listsize:
                 raise RuntimeError(("The 'problem' dictionary does not contain"
                                     " equally sized lists. Each entry of the dictionary"
@@ -138,7 +138,8 @@ def main(argv):
             'noise_lev_signal': 0.3,
             'noise_type_measurements': 'gaussian',
             'noise_lev_measurements': 0.0,
-            'random_seed': 1
+            'random_seed': 1,
+            'verbosity' : False
         }
         run_numerous_multiple_constellations(problem)
     elif task == 'show':

@@ -49,6 +49,7 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     noise_lev_measurements | Noise level of the measurement noise.
     random_seed | Random seed for the data creation. If given and fixed, the
                   same random data is created.
+    verbosity | If false, output will be very minimized.
 
     Method will save the results of each single run to a file called i_data.npz
     in the folder 'results_batch/<method>_<identifier>/', or if a 'results_prefix'
@@ -70,11 +71,13 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     with open(resultdir + 'log.txt', "a+") as f:
         json.dump(problem, f, sort_keys=True, indent=4)
     method = problem["method"]
+    verbosity = problem["verbosity"]
     sparsity_level = problem["sparsity_level"]
     meta_results = np.zeros((9, problem['num_tests']))
     np.random.seed(problem["random_seed"])
     for i in range(problem['num_tests']):
-        print "\nRun example {0}/{1}".format(i + 1, problem['num_tests'])
+        if verbosity:
+            print "\nRun example {0}/{1}".format(i + 1, problem['num_tests'])
         random_state = np.random.get_state()
         problem["random_state"] = random_state
         # Creating problem data
@@ -84,7 +87,8 @@ def run_numerous_one_constellation(problem, results_prefix = None):
         if not os.path.exists(resultdir + str(i) + "_data.npz"):
             success, support, target_support, elapsed_time, relative_error = \
                                 recover_support(A, y, u_real, v_real, method,
-                                                sparsity_level, verbose=True)
+                                                sparsity_level,
+                                                verbose=verbosity)
             symmetric_diff = symmetric_support_difference(support, target_support)
             np.savez_compressed(resultdir + str(i) + "_data.npz",
                                 elapsed_time=elapsed_time,
@@ -93,7 +97,10 @@ def run_numerous_one_constellation(problem, results_prefix = None):
                                 success=success,
                                 relative_error=relative_error)
     create_meta_results(resultdir)
-    print_meta_results(resultdir)
+    if verbosity:
+        print_meta_results(resultdir)
+    else:
+        print "Finished simulations."
 
 
 def create_meta_results(folder):
@@ -225,7 +232,8 @@ def main(argv):
             'noise_lev_signal': 0.2,
             'noise_type_measurements': 'gaussian',
             'noise_lev_measurements': 0.0,
-            'random_seed': 1223445
+            'random_seed': 1223445,
+            'verbosity' : False
         }
         run_numerous_one_constellation(problem)
     elif task == 'show':

@@ -83,7 +83,19 @@ def run_numerous_multiple_constellations(problem):
                                        results_prefix="results_multiple_batches/")
 
 
-def main(argv):
+def main(argv, problem):
+    """ Method to run multiple batches of problems. Can be used from terminal
+    line (run characteristics specified below) or as a function.
+
+    Parameters
+    -------------
+    argv : python list with 6 options and arguments to run simulation.
+        Example: argv = ['t', 'run', 'i', 'test', 'm', 'omp']
+
+    problem : python dictionary that contains the run characteristics.
+        See problem_factory/synthetic_random_data docs for details on the run
+        characteristics.
+    """
     identifier = ''
     task = ''
     method = ''
@@ -121,26 +133,11 @@ def main(argv):
         print "Please add valid method. Run file as follows:\n"
         print helpstr
         sys.exit(2)
+    problem.update({'identifier': identifier, 'method' : method})
     if task == 'run':
         print ("Running multiple batch simulation. Results will be stored in"
                " subfolders of '{0}'.".format('results_multiple_batches/' +
                                               identifier + '/'))
-        problem = {
-            'identifier': identifier,
-            'method' : method,
-            'num_tests': 20,
-            'n_measurements': [350, 500, 750],
-            'n_features': [1250, 1250, 1500],
-            'sparsity_level': 8,
-            'smallest_signal': 1.5,
-            'largest_signal': 2.0,
-            'noise_type_signal': 'uniform_ensured_max',
-            'noise_lev_signal': 0.3,
-            'noise_type_measurements': 'gaussian',
-            'noise_lev_measurements': 0.0,
-            'random_seed': 1,
-            'verbosity' : False
-        }
         run_numerous_multiple_constellations(problem)
     elif task == 'show':
         ctr = 0
@@ -159,4 +156,18 @@ def main(argv):
         sys.exit(2)
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    problem = {
+        'num_tests': 20,
+        'n_measurements': [350, 500, 750],
+        'n_features': [1250, 1250, 1500],
+        'sparsity_level': 8,
+        'smallest_signal': 1.5,
+        'largest_signal': 2.0,
+        'noise_type_signal': 'uniform_ensured_max',
+        'noise_lev_signal': 0.3,
+        'noise_type_measurements': 'gaussian',
+        'noise_lev_measurements': 0.0,
+        'random_seed': 1,
+        'verbosity' : False
+    }
+    main(sys.argv[1:], problem)

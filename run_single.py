@@ -77,7 +77,19 @@ def run_single(problem):
                         success=success,
                         relative_error=relative_error)
 
-def main(argv):
+def main(argv, problem):
+    """ Method to run single problem. Can be used from terminal line (run
+    characteristics specified below) or as a function.
+
+    Parameters
+    -------------
+    argv : python list with 4 options and arguments to run simulation.
+        Example: argv = ['i', 'test', 'm', 'omp']
+
+    problem : python dictionary that contains the run characteristics.
+        See problem_factory/synthetic_random_data docs for details on the run
+        characteristics.
+    """
     identifier = ''
     method = ''
     helpstr = ("===============================================================\n"
@@ -110,11 +122,14 @@ def main(argv):
         print "Please add valid method. Run file as follows:\n"
         print helpstr
         sys.exit(2)
+    problem.update({'identifier': identifier, 'method' : method})
     print "Running single simulation. Results will be stored in folder {0}".format(
         identifier)
+    run_single(problem)
+
+
+if __name__ == "__main__":
     problem = {
-        'identifier': identifier,
-        'method': method,
         'n_measurements': 250,
         'n_features': 1250,
         'sparsity_level': 10,
@@ -126,8 +141,4 @@ def main(argv):
         'noise_lev_measurements': 0.0,
         'random_seed': 123456
     }
-    run_single(problem)
-
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
+    main(sys.argv[1:], problem)

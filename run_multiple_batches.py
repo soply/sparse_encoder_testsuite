@@ -106,7 +106,7 @@ def main(argv, problem):
     method = ''
     helpstr = ("===============================================================\n"
                "Run file by typing 'python run_multiple_batchs.py -t <task>"
-               " -m <method> -i <identifier>'.\n"
+               "-i <identifier> -m <method>'.\n"
                "<task> can be 'run' to simula new batches or 'show' to show\n"
                "results of all runs belonging to a previous batch. \n"
                "<identifier> is an arbitrary folder name.\n"
@@ -131,7 +131,7 @@ def main(argv, problem):
         elif opt in ("-m", "--method"):
             method = arg
     if identifier == '':
-        print "Please add identifer and/or task. Run file as follows:\n"
+        print "Please add identifer. Run file as follows:\n"
         print helpstr
         sys.exit(2)
     if method == '' or not check_method_validity(method, verbose = True):

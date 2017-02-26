@@ -3,7 +3,7 @@ from timeit import default_timer as timer
 
 import numpy as np
 
-from calculation_utilities.least_squares_regression import \
+from ..calculation_utilities.least_squares_regression import \
                                                         least_squares_regression
 
 

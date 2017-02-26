@@ -8,20 +8,20 @@ from timeit import default_timer as timer
 
 import numpy as np
 
-from calculation_utilities.general import relative_error as calc_relative_error
-from encoders.cosamp import cosamp
-from encoders.iht import iterative_hard_thresholding
-from encoders.lar import least_angle_regression
-from encoders.lasso import lasso
-from encoders.mp import matching_pursuit
-from encoders.omp import orthogonal_matching_pursuit
-from encoders.romp import regularized_orthogonal_matching_pursuit
-from encoders.sp import subspace_pursuit
+from ..calculation_utilities.general import relative_error as calc_relative_error
+from cosamp import cosamp
+from iht import iterative_hard_thresholding
+from lar import least_angle_regression
+from lasso import lasso
+from mp import matching_pursuit
+from omp import orthogonal_matching_pursuit
+from romp import regularized_orthogonal_matching_pursuit
+from sp import subspace_pursuit
 
 # Available methods (romp, promp do not work currently)
 __list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "romp", "cosamp",
-                  "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
-                  "pcosamp", "psp"]
+                        "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
+                        "pcosamp", "psp"]
 
 def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
     """ Handler method to call the different sparse encoders. Ultimatively uses

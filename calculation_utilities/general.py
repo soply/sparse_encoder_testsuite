@@ -2,8 +2,10 @@
 import numpy as np
 
 def relative_error(u1, u2):
-    """ Doc"""
-    assert(u1.shape == u2.shape)
+    """ Doc """
+    if u1.shape != u2.shape:
+        raise RuntimeError("relative_error shape mismatch:{0} and {1}".format(
+            u1.shape, u2.shape))
     return np.linalg.norm(u1 - u2) / np.linalg.norm(u2)
 
 def symmetric_support_difference(support1, support2):
@@ -14,4 +16,4 @@ def symmetric_support_difference(support1, support2):
     Returns the list of non-overlapping indices as well as the length of
     non-overlapping nodes. """
     return len(np.setdiff1d(support1, support2)) + \
-        len(np.setdiff1d(support2, support1))
+           len(np.setdiff1d(support2, support1))

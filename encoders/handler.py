@@ -1,4 +1,9 @@
 #coding: utf8
+""" Handler and some utility methods for support recovery. Main interface to
+    communicate with the different methods for support recovery."""
+
+__author__ = "Timo Klock"
+
 from timeit import default_timer as timer
 
 import numpy as np
@@ -13,24 +18,52 @@ from encoders.omp import orthogonal_matching_pursuit
 from encoders.romp import regularized_orthogonal_matching_pursuit
 from encoders.sp import subspace_pursuit
 
+# Available methods (romp, promp do not work currently)
 __list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "romp", "cosamp",
                   "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
                   "pcosamp", "psp"]
 
 def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
-    """ Recover the support of u_real given the sampling operator A and the
-    measurements y. Method specifies one of the methods
+    """ Handler method to call the different sparse encoders. Ultimatively uses
+    encoder specified under method with the given data and recovers the support.
+    Returns a success flag, the final support, the target support, the elapsed
+    time and the relative error to the real solution.
 
-    -lars: Least angle regression
-    -lasso: Lasso-path algorithm
-    -omp: Orthogonal matching pursuit algorithm
+    Parameters
+    --------------
+    A : np.array, shape (n_measurements, n_features)
+        Sampling matrix
 
-    which is then filtered for the best support of the given sparsity level. For
-    lars and omp, there is only 1 support to each sparsity level that is a
-    candidate to approximate the support of u_real, but for lars there can be
-    more.
+    y : np.array, shape (n_measurements)
+        Vector of measurements.
 
-    Implementations used from scikit-learn. """
+    u_real : np.array, shape (n_features)
+        Signal that generated the measurements y under sampling of A, ie.
+        A(u_real + v_real) = y.
+
+    v_real : np.array, shape(n_features)
+        Signal noise involved in generating the measurements y under sampling
+        of A, ie. A(u_real + v_real) = y.
+
+    method : python string
+        Sparse encoder that should be used. Should be in the
+        __list_of_encoders__ specified above. promp and romp do not work
+        currently.
+
+    sparsity_level : python Integer
+        Support size of the generating signal u_real.
+
+    verbose : python Boolean
+        Controls print-outs of this method.
+
+    Returns
+    -----------------
+    success : True if correct support was recovered, false otherwise
+    support : Support recovered at the end.
+    target_support : Support of u_real.
+    elapsed_time : time spent for calculating the support/solution.
+    relative_error : relative l2 error between the recovered solution and u_real.
+    """
     target_support = np.where(u_real)[0]
     if method == "lar":
         result = least_angle_regression(A, y, sparsity_level)
@@ -75,6 +108,28 @@ def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
 
 
 def get_preconditioned_system(A, y):
+    """ Transforms given data into a preconditioned system by the Puffer
+    transformation. The Puffer transformation is given as F = U D^-1 U^T where
+    A = UDV^T is the SVD of A. The transformed data is given by
+    FA, Fy.
+
+    Parameters
+    -------------
+    A : np.array, shape (n_measurements, n_features)
+        Sampling matrix
+
+    y : np.array, shape (n_measurements)
+        Vector of measurements.
+
+    Returns
+    -------------
+    Returns precoditioned data, that is FA and Fy according to the formula above.
+
+    Sources
+    -------------
+    [1] Jia, Jinzhu, and Karl Rohe. "Preconditioning to comply with the
+        irrepresentable condition." arXiv preprint arXiv:1208.5584 (2012).
+    """
     U, S, V = np.linalg.svd(A)
     y_new = np.diag(1.0 / S).dot(U.T).dot(y)
     Pi = np.zeros(A.shape)
@@ -84,8 +139,24 @@ def get_preconditioned_system(A, y):
 
 
 def check_method_validity(method, verbose = False):
+    """ Checks if the given method is valid, ie. available.
+
+    Parameters
+    ------------
+    method : python string
+        Method name to check
+
+    verbose : Boolean
+        True if list of available methods should be shown in case of failure,
+        false otherwise.
+
+    Returns
+    -------------
+    True if the given method is available, false otherwise.
+    """
     if method not in __list_of_encoders__:
-        print("Method not found. Use one of {0}.\n".format(__list_of_encoders__))
+        if verbose:
+            print("Method not found. Use one of {0}.\n".format(__list_of_encoders__))
         return False
     else:
         return True

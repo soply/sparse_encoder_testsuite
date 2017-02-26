@@ -1,4 +1,9 @@
 # coding: utf8
+""" Methods to run and analyse repitions of experiments with synthetic random
+    data. Different run characteristics are possible. """
+
+__author__ = "Timo Klock"
+
 import getopt
 import json
 import os

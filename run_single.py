@@ -1,4 +1,7 @@
 # coding: utf8
+""" Methods to run and analyse a single experiment with synthetic random
+    data. """
+
 import getopt
 import json
 import os

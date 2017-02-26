@@ -36,7 +36,7 @@ def least_squares_regression(matrix, rhs, support = None):
     the least squares problem. If the solution is not unique (underdetermined)
     system, consult the docs of LSMR to see which solution is provided.
     """
-    return regularised_least_squares_regression(0.0, support, matrix, rhs)
+    return regularised_least_squares_regression(0.0, matrix, rhs, support)
 
 def regularised_least_squares_regression(reg_param, matrix, rhs, support = None):
     """ Method performs a regularised least squares regression, i.e. solves

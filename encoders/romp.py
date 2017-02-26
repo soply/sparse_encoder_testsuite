@@ -3,12 +3,14 @@ from timeit import default_timer as timer
 
 import numpy as np
 
-from calculation_utilities import least_squares_regression
+from calculation_utilities.least_squares_regression import \
+                                                        least_squares_regression
 
 
 def regularized_orthogonal_matching_pursuit(A, y, sparsity_level, **kwargs):
     """ Regularised orthogonal matching pursuit algorithm.
-    FIXME: Something still wrong here.
+    FIXME: Current implementation does not work. There must be a mistake, but
+           could not been found yet.
     """
     # Default choice: discrepancy principle with tau = 1
     tolerance = kwargs.get('stopping_tolerance', 1e-13)

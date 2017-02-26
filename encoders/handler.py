@@ -1,6 +1,7 @@
 #coding: utf8
-import numpy as np
 from timeit import default_timer as timer
+
+import numpy as np
 
 from calculation_utilities.general import relative_error as calc_relative_error
 from encoders.cosamp import cosamp
@@ -82,8 +83,9 @@ def get_preconditioned_system(A, y):
     return V_lp, y_new
 
 
-def check_method_validity(method):
+def check_method_validity(method, verbose = False):
     if method not in __list_of_encoders__:
+        print("Method not found. Use one of {0}.\n".format(__list_of_encoders__))
         return False
     else:
         return True

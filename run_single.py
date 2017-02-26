@@ -84,7 +84,7 @@ def main(argv):
                "Run file by typing 'python run_single.py -i <identifier> -m "
                "<method>.\n"
                "<identifier> is an arbitraray folder name.\n"
-               "<method> specifies the sparse encoder to use\n"
+               "<method> specifies the sparse encoder to use.\n"
                "The run characteristics are specified inside 'run_single.py' file.\n"
                "===============================================================\n")
     try:

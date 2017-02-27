@@ -64,6 +64,14 @@ def run_numerous_multiple_constellations(problem):
     b) Please consult the docs of 'run_batch.run_numerous_one_constellation' for
        more information on the problem dictionary.
     """
+    parentdir = "results_multiple_batches/" + problem['method'] + "_" + \
+                                  problem['identifier']
+    if not os.path.exists(parentdir):
+        os.makedirs(parentdir)
+    # Write log file to parent folder with problem description
+    with open(parentdir + '/log.txt', "w") as f:
+        json.dump(problem, f, sort_keys=True, indent=4)
+        f.write("\n")
     # Check if problem dictionary contains either a single object, or a list of
     # the same size for each dictionary entry.
     listsize = 1

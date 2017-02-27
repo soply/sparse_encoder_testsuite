@@ -74,7 +74,8 @@ def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
     elif method == "omp":
         result = orthogonal_matching_pursuit(A, y, sparsity_level)
     elif method == "iht":
-        result = iterative_hard_thresholding(A, y, sparsity_level, verbose=True)
+        result = iterative_hard_thresholding(A, y, sparsity_level,
+                                             verbose = verbose)
     elif method == "romp":
         result = regularized_orthogonal_matching_pursuit(A, y, sparsity_level)
     elif method == "cosamp":
@@ -130,12 +131,9 @@ def get_preconditioned_system(A, y):
     [1] Jia, Jinzhu, and Karl Rohe. "Preconditioning to comply with the
         irrepresentable condition." arXiv preprint arXiv:1208.5584 (2012).
     """
-    U, S, V = np.linalg.svd(A)
+    U, S, V = np.linalg.svd(A, full_matrices = False)
     y_new = np.diag(1.0 / S).dot(U.T).dot(y)
-    Pi = np.zeros(A.shape)
-    np.fill_diagonal(Pi, 1.0)
-    V_lp = Pi.dot(V)
-    return V_lp, y_new
+    return V, y_new
 
 
 def check_method_validity(method, verbose = False):

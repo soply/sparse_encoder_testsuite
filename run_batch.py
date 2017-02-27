@@ -73,8 +73,9 @@ def run_numerous_one_constellation(problem, results_prefix = None):
                                        problem['identifier'] + '/'
     if not os.path.exists(resultdir):
         os.makedirs(resultdir)
-    with open(resultdir + 'log.txt', "a+") as f:
+    with open(resultdir + 'log.txt', "w") as f:
         json.dump(problem, f, sort_keys=True, indent=4)
+        f.write("\n")
     method = problem["method"]
     verbosity = problem["verbosity"]
     sparsity_level = problem["sparsity_level"]

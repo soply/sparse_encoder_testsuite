@@ -58,8 +58,9 @@ def run_single(problem):
                                     problem['identifier'] + '/'
     if not os.path.exists(resultdir):
         os.makedirs(resultdir)
-    with open(resultdir + 'log.txt', "a+") as f:
+    with open(resultdir + 'log.txt', "w") as f:
         json.dump(problem, f, sort_keys=True, indent=4)
+        f.write("\n")
     # Extract encoder from problem data
     method = problem["method"]
     sparsity_level = problem["sparsity_level"]

@@ -120,35 +120,36 @@ def create_meta_results(folder):
     contain the information as saved for example in the
     'run_numerous_one_constellation' method. The meta results consist of
 
-    0 : Correct support was identified.
-    1 : Symmetric difference.
-    2 : Elapsed time
-    3 : Relative error.
+    "success" : Correct support was identified.
+    "symmetric_difference" : Symmetric difference.
+    "elapsed_time" : Elapsed time
+    "relative_error" : Relative error.
 
-    They are stored in the given folder and named as meta.txt.
+    They are stored in the given folder and named as meta.npz.
 
     Parameters
     ------------
     folder : string
         Foldername in which files <num_run> + _data.npz are stored.
-
-    Remarks
-    ------------
-    -Format of meta results is one run per column, 4 rows corresponding to the
-     above mentioned characteristics.
     """
-    meta_results = np.zeros((0, 4))
+    success = []
+    symmetric_difference = []
+    elapsed_time = []
+    relative_error = []
     meta_results_tmp = np.zeros(4)
     i = 0
     while os.path.exists(folder + str(i) + "_data.npz"):
         datafile = np.load(folder + str(i) + "_data.npz")
-        meta_results_tmp[0] = datafile['success']
-        meta_results_tmp[1] = datafile['symmetric_difference']
-        meta_results_tmp[2] = datafile['elapsed_time']
-        meta_results_tmp[3] = datafile['relative_error']
-        meta_results = np.vstack((meta_results, meta_results_tmp))
-        i = i + 1
-    np.savetxt(folder + "meta.txt", meta_results)
+        success.append(datafile['success'])
+        symmetric_difference.append(datafile['symmetric_difference'])
+        elapsed_time.append(datafile['elapsed_time'])
+        relative_error.append(datafile['relative_error'])
+        i += 1
+    np.savez_compressed(folder + "meta",
+                        elapsed_time=np.array(elapsed_time),
+                        symmetric_difference=np.array(symmetric_difference),
+                        success=np.array(success),
+                        relative_error=np.array(relative_error))
 
 def print_meta_results(folder):
     """ Method to print out the meta results to the terminal. The print-out
@@ -164,25 +165,26 @@ def print_meta_results(folder):
         Foldername of where to the respective find 'meta.txt' file. Note that
         the full searched location is given by pwd+'<folder>/meta.txt'.
     """
-    meta_results = np.loadtxt(folder + "/meta.txt")
-    num_tests = meta_results.shape[0]
-    meta_summary = np.sum(meta_results, axis=0) / float(num_tests)
+    meta_results = np.load(folder + "/meta.npz")
+    num_tests = meta_results["success"].shape[0]
     print "================== META RESULTS ======================"
     print "1) Percentages:"
-    print "Support at the end recovered: {0}".format(meta_summary[0])
+    print "Support at the end recovered: {0}".format(
+                np.sum(meta_results['success'])/float(num_tests))
     print "\n2) Timings:"
     print "Avg = {0}    \nVariance = {1}  \n0.95-range = {2}   \nMin = {3}   \nMax = {4}".format(
-        np.mean(meta_results[:, 2]),
-        np.var(meta_results[:, 2]),
-        [np.min(np.percentile(meta_results[:, 2], 0.95)),
-            np.max(np.percentile(meta_results[:, 2], 95))],
-        np.min(meta_results[:, 2]),
-        np.max(meta_results[:, 2]))
+        np.mean(meta_results["elapsed_time"]),
+        np.var(meta_results["elapsed_time"]),
+        [np.min(np.percentile(meta_results["elapsed_time"], 0.95)),
+            np.max(np.percentile(meta_results["elapsed_time"], 95))],
+        np.min(meta_results["elapsed_time"]),
+        np.max(meta_results["elapsed_time"]))
     print "\n3) Suspicious cases:"
-    incorrect_supp = np.where(meta_results[:, 0] == 0)[0]
+    incorrect_supp = np.where(meta_results["success"] == 0)[0]
     print "Examples support not correct: {0}".format(incorrect_supp)
     print "Symmetric differences unequal to zero: {0}".format(
-                        zip(incorrect_supp, meta_results[incorrect_supp, 1]))
+                zip(incorrect_supp, meta_results["symmetric_difference"]
+                                                [incorrect_supp]))
 
 
 def main(argv, problem):

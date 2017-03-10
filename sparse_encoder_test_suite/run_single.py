@@ -1,6 +1,9 @@
 # coding: utf8
 """ Methods to run and analyse a single experiment with synthetic random
     data. """
+
+__author__ = "Timo Klock"
+
 import json
 import os
 
@@ -45,6 +48,8 @@ def run_single(problem):
     noise_lev_measurements | Noise level of the measurement noise.
     random_seed | Random seed for the data creation. If given and fixed, the
                   same random data is created.
+    sampling_matrix_type | Type of sampling matrix. See random_matrices.py in
+                           problem_factory folder to see available matrices.
 
     Method will save the results to a file called data.npz
     in the folder 'results_single/<method>_<identifier>/'.

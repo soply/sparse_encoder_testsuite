@@ -1,6 +1,8 @@
 # coding: utf8
 """ Callable run script to perform single experiments. """
 
+__author__ = "Timo Klock"
+
 import getopt
 import sys
 
@@ -69,6 +71,7 @@ if __name__ == "__main__":
         'noise_lev_signal': 0.2,
         'noise_type_measurements': 'gaussian',
         'noise_lev_measurements': 0.0,
-        'random_seed': 123456
+        'random_seed': 123456,
+        'sampling_matrix_type': 'gaussian'
     }
     main(sys.argv[1:], problem)

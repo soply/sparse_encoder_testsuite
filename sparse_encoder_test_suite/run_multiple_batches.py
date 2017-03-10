@@ -46,7 +46,8 @@ def run_numerous_multiple_constellations(problem):
         'noise_type_measurements': 'gaussian',
         'noise_lev_measurements': 0.0,
         'random_seed': 1,
-        'verbosity' : False
+        'verbosity' : False,
+        'sampling_matrix_type': 'gaussian'
     }
     'run_numerous_multiple_constellations(problem)'
 

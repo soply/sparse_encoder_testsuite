@@ -53,6 +53,8 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     random_seed | Random seed for the data creation. If given and fixed, the
                   same random data is created.
     verbosity | If false, output will be very minimized.
+    sampling_matrix_type | Type of sampling matrix. See random_matrices.py in
+                           problem_factory folder to see available matrices.
 
     Method will save the results of each single run to a file called i_data.npz
     in the folder 'results_batch/<method>_<identifier>/', or if a 'results_prefix'

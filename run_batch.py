@@ -93,6 +93,7 @@ if __name__ == "__main__":
         'noise_type_measurements': 'gaussian',
         'noise_lev_measurements': 0.0,
         'random_seed': 1223445,
-        'verbosity' : False
+        'verbosity' : False,
+        'sampling_matrix_type' : 'prtm_gaussian'
     }
     main(sys.argv[1:], problem)

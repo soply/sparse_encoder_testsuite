@@ -54,7 +54,7 @@ def run_single(problem):
                            problem_factory folder to see available matrices.
     problem_type | The type of problem to solve. Problems of type 1) are called
                    'unmixing', problems of type 2) are called 'pertubation'.
-                   
+
     Moreover, dependent on the problem type, the following properties need to be
     specified as well.
 
@@ -64,9 +64,10 @@ def run_single(problem):
     noise_lev_signal | Noise level of the signal noise.
 
     For problems of type 2):
-    noise_type_signal | Type of noise that is applied to the signal (ie. type
-                        of noise of v).
-    noise_lev_signal | Noise level of the signal noise.
+    pertubation_matrix_type | Type of pertubation matrix that is added to
+                              A. Can take same values as the sampling matrix.
+    pertubation_matrix_level | Scaling factor between pertubation matrix
+                               and sampling matrix, ie. ||E||_2/||A||_2.
 
     Method will save the results to a file called data.npz
     in the folder 'results_single/<method>_<identifier>/'.

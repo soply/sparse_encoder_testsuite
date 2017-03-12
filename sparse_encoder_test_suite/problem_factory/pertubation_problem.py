@@ -43,8 +43,8 @@ def create_specific_problem_data_from_problem(problem):
                       same random data is created.
         sampling_matrix_type | Type of sampling matrix. See random_matrices.py
                                in this folder to see available matrices.
-        pertubation_matrix_type | Type of noise that is applied to the signal (ie.
-                                  type of noise of v).
+        pertubation_matrix_type | Type of pertubation matrix that is added to
+                                  A. Can take same values as the sampling matrix.
         pertubation_matrix_level | Scaling factor between pertubation matrix
                                    and sampling matrix, ie. ||E||_2/||A||_2.
 

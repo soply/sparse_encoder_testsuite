@@ -68,9 +68,10 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     noise_lev_signal | Noise level of the signal noise.
 
     For problems of type 2):
-    noise_type_signal | Type of noise that is applied to the signal (ie. type
-                        of noise of v).
-    noise_lev_signal | Noise level of the signal noise.
+    pertubation_matrix_type | Type of pertubation matrix that is added to
+                              A. Can take same values as the sampling matrix.
+    pertubation_matrix_level | Scaling factor between pertubation matrix
+                               and sampling matrix, ie. ||E||_2/||A||_2.
 
     Method will save the results of each single run to a file called i_data.npz
     in the folder 'results_batch/<method>_<identifier>/', or if a 'results_prefix'

@@ -21,7 +21,7 @@ def main(argv, problem):
         Example: argv = ['t', 'run', 'i', 'test', 'm', 'omp']
 
     problem : python dictionary that contains the run characteristics.
-        See problem_factory/synthetic_random_data docs for details on the run
+        See problem_factory/ docs for details on the run
         characteristics.
     """
     identifier = ''

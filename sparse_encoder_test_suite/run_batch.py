@@ -11,7 +11,7 @@ import numpy as np
 
 from calculation_utilities.general import symmetric_support_difference
 from encoders.handler import check_method_validity, recover_support
-from problem_factory.synthetic_random_data import \
+from problem_factory.unmixing_problem import \
     create_specific_problem_data_from_problem
 
 

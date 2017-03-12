@@ -121,7 +121,7 @@ def create_specific_problem_data(n_measurements, n_features, sparsity_level,
     E = create_sampling_matrix(n_measurements, n_features,
                                pertubation_matrix_type)
     # Rescale E
-    E = pertubation_matrix_level * np.linalg.norm(E, 2)/np.linalg.norm(A, 2)
+    E = pertubation_matrix_level * np.linalg.norm(E, 2)/np.linalg.norm(A, 2) * E
     u_real = create_sparse_signal(A.shape[1], sparsity_level, smallest_signal,
                                   largest_signal=largest_signal)
     y = (A + E).dot(u_real)
@@ -129,4 +129,4 @@ def create_specific_problem_data(n_measurements, n_features, sparsity_level,
         m_noise = create_noise(A.shape[0], noise_lev_measurements,
             noise_type_measurements, random_state = random_state)
         y = y + m_noise
-    return A, y, u_real, v_real
+    return A, y, u_real, E

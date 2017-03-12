@@ -12,15 +12,19 @@ import numpy as np
 from calculation_utilities.general import symmetric_support_difference
 from encoders.handler import check_method_validity, recover_support
 from problem_factory.unmixing_problem import \
-    create_specific_problem_data_from_problem
+    create_specific_problem_data_from_problem as create_data_unmixing
+from problem_factory.pertubation_problem import \
+    create_specific_problem_data_from_problem as create_data_pertubation
 
+__available_problem_types__ = ['unmixing', 'pertubation']
 
 def run_numerous_one_constellation(problem, results_prefix = None):
-    """ Create numerous simulations of problems of type
+    """ Create numerous simulations of problems of one of the following types:
 
-        A * (u + v) = y + eps
+        1) A * (u + v) = y + eps
+        2) (A + E)u = y + eps
 
-    with randomly created data A, u, v and eps. The run characteristics (ie.
+    with randomly created data. The run characteristics (ie.
     noise levels, noise types, signal and noise strength and so forth) are
     given in the dictionary called 'problem'. Also, the
     dictionary stores other important characteristics of the run. Concretely,
@@ -44,9 +48,6 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     sparsity_level | Sparsity level of the correct u in A(u+v) = y + eps
     smallest_signal | Minimal signal strength min(|u_i|, i in supp(u))
     largest_signal | Maximal signal strength max(|u_i|, i in supp(u))
-    noise_type_signal | Type of noise that is applied to the signal (ie. type
-                        of noise of v).
-    noise_lev_signal | Noise level of the signal noise.
     noise_type_measurements | Type of noise that is applied to the measurements
                               y (ie. type of noise of eps).
     noise_lev_measurements | Noise level of the measurement noise.
@@ -55,6 +56,21 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     verbosity | If false, output will be very minimized.
     sampling_matrix_type | Type of sampling matrix. See random_matrices.py in
                            problem_factory folder to see available matrices.
+    problem_type | The type of problem to solve. Problems of type 1) are called
+                   'unmixing', problems of type 2) are called 'pertubation'.
+
+    Moreover, dependent on the problem type, the following properties need to be
+    specified as well.
+
+    For problems of type 1):
+    noise_type_signal | Type of noise that is applied to the signal (ie. type
+                        of noise of v).
+    noise_lev_signal | Noise level of the signal noise.
+
+    For problems of type 2):
+    noise_type_signal | Type of noise that is applied to the signal (ie. type
+                        of noise of v).
+    noise_lev_signal | Noise level of the signal noise.
 
     Method will save the results of each single run to a file called i_data.npz
     in the folder 'results_batch/<method>_<identifier>/', or if a 'results_prefix'
@@ -81,14 +97,20 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     sparsity_level = problem["sparsity_level"]
     meta_results = np.zeros((9, problem['num_tests']))
     np.random.seed(problem["random_seed"])
+    problem_type = problem["problem_type"]
     for i in range(problem['num_tests']):
         if verbosity:
             print "\nRun example {0}/{1}".format(i + 1, problem['num_tests'])
         random_state = np.random.get_state()
         problem["random_state"] = random_state
         # Creating problem data
-        A, y, u_real, v_real = create_specific_problem_data_from_problem(
-            problem)
+        if problem_type == "unmixing":
+            A, y, u_real, v_real = create_data_unmixing(problem)
+        elif problem_type == "pertubation":
+            A, y, u_real, E = create_data_pertubation(problem)
+        else:
+            raise RuntimeError("Problem type {0} not recognized. Available {1}".format(
+                problem_type, __available_problem_types__))
         target_support = np.where(u_real)[0]
         if not os.path.exists(resultdir + str(i) + "_data.npz"):
             success, support, target_support, elapsed_time, relative_error = \

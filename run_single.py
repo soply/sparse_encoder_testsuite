@@ -72,6 +72,9 @@ if __name__ == "__main__":
         'noise_type_measurements': 'gaussian',
         'noise_lev_measurements': 0.0,
         'random_seed': 123456,
-        'sampling_matrix_type': 'gaussian'
+        'sampling_matrix_type': 'gaussian',
+        'problem_type' : 'pertubation',
+        'pertubation_matrix_type' : 'gaussian',
+        'pertubation_matrix_level' : 0.75,
     }
     main(sys.argv[1:], problem)

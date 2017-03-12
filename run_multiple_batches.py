@@ -99,6 +99,7 @@ if __name__ == "__main__":
         'noise_lev_measurements': 0.0,
         'random_seed': 1,
         'verbosity' : False,
-        'sampling_matrix_type' : 'gaussian'
+        'sampling_matrix_type' : 'gaussian',
+        'problem_type' : 'unmixing',
     }
     main(sys.argv[1:], problem)

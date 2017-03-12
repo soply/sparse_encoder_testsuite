@@ -1,7 +1,6 @@
 # coding: utf8
-""" Methods to create different types of random matrices. These methods are
-    typically called from synthetic_random_data.py to create a problem from
-    random data. Types of matrices implemented:
+""" Methods to create different types of random matrices.
+    Types of matrices implemented:
 
         1) random iid Gaussian matrix
         2) Partial Random Circulant matrices with Rademacher vectors
@@ -9,7 +8,6 @@
         4) Partial Random Toeplitz matrices with Rademacher vectors
         5)                                  with Standard Gaussian vectors
 
-    More coming soon.
     """
 
 __author__ = "Timo Klock"

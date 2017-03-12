@@ -92,7 +92,7 @@ def run_numerous_one_constellation(problem, results_prefix = None):
         target_support = np.where(u_real)[0]
         if not os.path.exists(resultdir + str(i) + "_data.npz"):
             success, support, target_support, elapsed_time, relative_error = \
-                                recover_support(A, y, u_real, v_real, method,
+                                recover_support(A, y, u_real, method,
                                                 sparsity_level,
                                                 verbose=verbosity)
             symmetric_diff = symmetric_support_difference(support, target_support)

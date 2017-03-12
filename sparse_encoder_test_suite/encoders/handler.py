@@ -23,7 +23,7 @@ __list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "romp", "cosamp",
                         "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
                         "pcosamp", "psp"]
 
-def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
+def recover_support(A, y, u_real, method, sparsity_level, verbose=True):
     """ Handler method to call the different sparse encoders. Ultimatively uses
     encoder specified under method with the given data and recovers the support.
     Returns a success flag, the final support, the target support, the elapsed
@@ -39,11 +39,7 @@ def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
 
     u_real : np.array, shape (n_features)
         Signal that generated the measurements y under sampling of A, ie.
-        A(u_real + v_real) = y.
-
-    v_real : np.array, shape(n_features)
-        Signal noise involved in generating the measurements y under sampling
-        of A, ie. A(u_real + v_real) = y.
+        A * u_real = y (+ potential signal/measurements noise).
 
     method : python string
         Sparse encoder that should be used. Should be in the
@@ -88,7 +84,7 @@ def recover_support(A, y, u_real, v_real, method, sparsity_level, verbose=True):
         start_time = timer()
         V_lp, y_new = get_preconditioned_system(A, y)
         # Call method again without p in method name
-        result = recover_support(V_lp, y_new, u_real, v_real, method[1:],
+        result = recover_support(V_lp, y_new, u_real, method[1:],
                                  sparsity_level, verbose=verbose)
         elapsed_time = start_time - timer()  #  Replace time with total time
         return result[0], result[1], result[2], elapsed_time, result[4]

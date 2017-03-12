@@ -73,7 +73,7 @@ def run_single(problem):
     # Creating problem data
     A, y, u_real, v_real = create_specific_problem_data_from_problem(problem)
     success, support, target_support, elapsed_time, relative_error = \
-                                recover_support(A, y, u_real, v_real, method,
+                                recover_support(A, y, u_real, method,
                                                 sparsity_level, verbose=True)
     symmetric_diff = symmetric_support_difference(support, target_support)
     np.savez_compressed(resultdir + "data.npz",

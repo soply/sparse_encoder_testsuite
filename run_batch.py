@@ -81,15 +81,21 @@ def main(argv, problem):
         sys.exit(2)
 
 if __name__ == "__main__":
+    solver_parameter = {
+        'beta_min' : 1e-6,
+        'beta_max' : 100.0,
+        'n_beta' : 10,
+        'beta_scaling' : 'logscale',
+        'suppress_warning' : True,
+    }
     problem = {
+        'solver_parameter' : solver_parameter,
         'num_tests': 100,
         'n_measurements': 250,
         'n_features': 800,
         'sparsity_level': 15,
         'smallest_signal': 1.5,
-        'largest_signal': 50.0,
-        'noise_type_signal': 'uniform_ensured_max',
-        'noise_lev_signal': 0.2,
+        'largest_signal': 50.5,
         'noise_type_measurements': 'gaussian',
         'noise_lev_measurements': 0.0,
         'random_seed': 1223445,

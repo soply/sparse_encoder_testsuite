@@ -17,13 +17,16 @@ from mp import matching_pursuit
 from omp import orthogonal_matching_pursuit
 from romp import regularized_orthogonal_matching_pursuit
 from sp import subspace_pursuit
+from multi_penalty_grid import mp_lasso_grid, mp_lars_grid
 
 # Available methods (romp, promp do not work currently)
 __list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "romp", "cosamp",
                         "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
-                        "pcosamp", "psp"]
+                        "pcosamp", "psp", "mp_lasso_grid", "mp_lars_grid",
+                        "pmp_lasso_grid", "pmp_lars_grid"]
 
-def recover_support(A, y, u_real, method, sparsity_level, verbose=True):
+def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
+                    **kwargs):
     """ Handler method to call the different sparse encoders. Ultimatively uses
     encoder specified under method with the given data and recovers the support.
     Returns a success flag, the final support, the target support, the elapsed
@@ -52,6 +55,9 @@ def recover_support(A, y, u_real, method, sparsity_level, verbose=True):
     verbose : python Boolean
         Controls print-outs of this method.
 
+    kwargs : python dictionary
+        Keyword arguments than will be passed to the solver if necessary.
+
     Returns
     -----------------
     success : True if correct support was recovered, false otherwise
@@ -62,9 +68,13 @@ def recover_support(A, y, u_real, method, sparsity_level, verbose=True):
     """
     target_support = np.where(u_real)[0]
     if method == "lar":
-        result = least_angle_regression(A, y, sparsity_level)
+        result = least_angle_regression(A, y, sparsity_level, **kwargs)
     elif method == "lasso":
         result = lasso(A, y, target_support, sparsity_level)
+    elif method == 'mp_lasso_grid':
+        result = mp_lasso_grid(A, y, target_support, sparsity_level, **kwargs)
+    elif method == 'mp_lars_grid':
+        result = mp_lars_grid(A, y, target_support, sparsity_level, **kwargs)
     elif method == "mp":
         result = matching_pursuit(A, y, sparsity_level)
     elif method == "omp":

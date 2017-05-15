@@ -68,6 +68,11 @@ def run_single(problem):
                               A. Can take same values as the sampling matrix.
     pertubation_matrix_level | Scaling factor between pertubation matrix
                                and sampling matrix, ie. ||E||_2/||A||_2.
+    solver_parameter (optional) | Python dictionary that may contain additional
+                                  parameters that a necessary for a specific
+                                  solver. To get more information on solver
+                                  parameters, check out the encoders code and
+                                  docs of solvers.
 
     Method will save the results to a file called data.npz
     in the folder 'results_single/<method>_<identifier>/'.
@@ -89,6 +94,7 @@ def run_single(problem):
     random_state = np.random.get_state()
     problem["random_state"] = random_state
     problem_type = problem["problem_type"]
+    solver_parameter = problem.get('solver_parameter', {})
     # Creating problem data
     if problem_type == "unmixing":
         A, y, u_real, v_real = create_data_unmixing(problem)
@@ -99,7 +105,8 @@ def run_single(problem):
             problem_type, __available_problem_types__))
     success, support, target_support, elapsed_time, relative_error = \
                                 recover_support(A, y, u_real, method,
-                                                sparsity_level, verbose=True)
+                                                sparsity_level, verbose=True,
+                                                **solver_parameter)
     symmetric_diff = symmetric_support_difference(support, target_support)
     np.savez_compressed(resultdir + "data.npz",
                         elapsed_time=elapsed_time,

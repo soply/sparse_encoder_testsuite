@@ -61,20 +61,25 @@ def main(argv, problem):
 
 
 if __name__ == "__main__":
+    solver_parameter = {
+        'beta_min' : 1e-6,
+        'beta_max' : 100.0,
+        'n_beta' : 10,
+        'beta_scaling' : 'logscale',
+        'suppress_warning' : True,
+    }
     problem = {
-        'n_measurements': 250,
-        'n_features': 1250,
-        'sparsity_level': 10,
-        'smallest_signal': 1.5,
-        'largest_signal': 2.0,
-        'noise_type_signal': 'uniform_ensured_max',
-        'noise_lev_signal': 0.2,
-        'noise_type_measurements': 'gaussian',
-        'noise_lev_measurements': 0.0,
-        'random_seed': 123456,
-        'sampling_matrix_type': 'gaussian',
-        'problem_type' : 'pertubation',
-        'pertubation_matrix_type' : 'gaussian',
-        'pertubation_matrix_level' : 0.75,
+        'n_measurements': 250, # m
+        'n_features': 1250, # n
+        'sparsity_level': 6, # Sparsity level of u
+        'smallest_signal': 1.5, # Smallest signal size in u
+        'largest_signal': 2.0, # Largest signal size in u
+        'noise_type_signal': 'uniform_ensured_max', # Uniformly distributed noise where the maximum allowed value is taken for sure
+        'noise_lev_signal': 0.2, # Noise level of the vector v (exact meaning depends on noise type)
+        'noise_type_measurements': 'gaussian', # Additional measurement noise if desired. Can be of the same type.
+        'noise_lev_measurements': 0.0, # Noise level of the additional measurement noise.
+        'random_seed': 12, # Just to fix the randomness
+        'sampling_matrix_type' : 'prtm_rademacher', # Partial random circulant matrix from a Rademacher sequence
+        'problem_type' : 'unmixing' # 'unmixing' A(u+v) = y or 'pertubation' (A + E)u = y
     }
     main(sys.argv[1:], problem)

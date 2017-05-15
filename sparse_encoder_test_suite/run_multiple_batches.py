@@ -32,7 +32,15 @@ def run_numerous_multiple_constellations(problem):
 
     Example
     ------------
+    solver_parameter = {
+        'beta_min' : 1e-6,
+        'beta_max' : 100.0,
+        'n_beta' : 10,
+        'beta_scaling' : 'logscale',
+        'suppress_warning' : True,
+    }
     problem = {
+        'solver_parameter' : solver_parameter,
         'identifier': 'test1',
         'method' : 'lasso',
         'num_tests': 20,

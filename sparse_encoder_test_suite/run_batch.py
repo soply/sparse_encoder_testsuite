@@ -72,6 +72,11 @@ def run_numerous_one_constellation(problem, results_prefix = None):
                               A. Can take same values as the sampling matrix.
     pertubation_matrix_level | Scaling factor between pertubation matrix
                                and sampling matrix, ie. ||E||_2/||A||_2.
+    solver_parameter (optional) | Python dictionary that may contain additional
+                                  parameters that a necessary for a specific
+                                  solver. To get more information on solver
+                                  parameters, check out the encoders code and
+                                  docs of solvers.
 
     Method will save the results of each single run to a file called i_data.npz
     in the folder 'results_batch/<method>_<identifier>/', or if a 'results_prefix'
@@ -99,6 +104,7 @@ def run_numerous_one_constellation(problem, results_prefix = None):
     meta_results = np.zeros((9, problem['num_tests']))
     np.random.seed(problem["random_seed"])
     problem_type = problem["problem_type"]
+    solver_parameter = problem.get('solver_parameter', {})
     for i in range(problem['num_tests']):
         if verbosity:
             print "\nRun example {0}/{1}".format(i + 1, problem['num_tests'])
@@ -117,7 +123,8 @@ def run_numerous_one_constellation(problem, results_prefix = None):
             success, support, target_support, elapsed_time, relative_error = \
                                 recover_support(A, y, u_real, method,
                                                 sparsity_level,
-                                                verbose=verbosity)
+                                                verbose=verbosity,
+                                                **solver_parameter)
             symmetric_diff = symmetric_support_difference(support, target_support)
             np.savez_compressed(resultdir + str(i) + "_data.npz",
                                 elapsed_time=elapsed_time,

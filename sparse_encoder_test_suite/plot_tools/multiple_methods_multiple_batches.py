@@ -10,13 +10,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+__color_rotation__ = ['b','g','r','c','m','y','k']
 __marker_rotation__ = ['o', 'H', 's', '^', 'None', '+', '.', 'D', 'x']
 __linestyle_rotation__ = ['-', '--', ':', '-.']
 
 def success_vs_sparsity_level(basefolder, identifier, methods,
                               alternative_keys = None, title = None,
                               xlabel = None, ylabel = None, save_as = None,
-                              leg_loc = 'lower right', legend_entries = None):
+                              leg_loc = 'lower right', legend_entries = None,
+                              legend_cols = 2, legend_fontsize = 20,
+                              colors = None,
+                              plot_handles = None):
     """ Creates a plot success rate vs sparsity level plot. Sparsity level is
     on x axis and success rate on y. The method akes a list of methods as an
     input, so several methods can be compared.  The data is assumed to lie at
@@ -54,6 +58,9 @@ def success_vs_sparsity_level(basefolder, identifier, methods,
     ylabel, optional : python string
         Optinal ylabel of the plot.
 
+    legend_cols : int
+        Columns in the legend
+
     save_as, optional : python string
         If given, saves the figure to the file provided under 'save_as'.
 
@@ -63,6 +70,20 @@ def success_vs_sparsity_level(basefolder, identifier, methods,
     legend_entries, optional : List of strings
         List of strings of the same size as methods (if given), yielding legend
         entries.
+
+    legend_fontsize : int
+        Fontsize of the legend
+
+    colors : List of python strings of matplotlib colors
+        E.g. colors = ['b','r','b','r'] and so on.
+
+    plot_handles : matplotlib figure and axis objects
+        In case, an existing plot should be extended we can give the figure and
+        axis handle.
+
+        Example:
+            fig, ax = plt.figure()
+            plot_handles = (fig, ax)
     """
     folder_names = {}
     for method in methods:
@@ -90,31 +111,45 @@ def success_vs_sparsity_level(basefolder, identifier, methods,
             else:
                 raise RuntimeError("Can not find key for success rate in" + \
                     " results. Keys are: {0}".format(meta_results.keys()))
-    fig = plt.figure(figsize = (16,9))
+    if plot_handles is None:
+        fig = plt.figure(figsize = (16,9))
+        ax = plt.gca()
+        cycle_offset = 0
+    else:
+        fig, ax = plot_handles
+        cycle_offset = len(ax.lines)
+    if colors is None:
+        colors = color_rotation
+
     for j in range(success_rates.shape[1]):
-        plt.plot(sparsity_levels, success_rates[:,j], linewidth = 3.0,
-            linestyle = __linestyle_rotation__[j % len(__linestyle_rotation__)],
-                marker = __marker_rotation__[j % len(__marker_rotation__)],
+        ax.plot(sparsity_levels, success_rates[:,j], linewidth = 3.0,
+                c = colors[(j+5+cycle_offset) % len(colors)],
+                linestyle = __linestyle_rotation__[(j + +cycle_offset) % len(__linestyle_rotation__)],
+                marker = __marker_rotation__[(j + +cycle_offset) % len(__marker_rotation__)],
                 markersize = 15.0)
     if legend_entries is None:
-        legend_entries = [r''+ method.replace('_','').upper() for method in methods]
-    plt.legend(legend_entries, loc = leg_loc, ncol = 2, fontsize = 20.0)
+        ax.legend(methods, loc = leg_loc, ncol = 2,
+                   fontsize = legend_fontsize)
+    else:
+        ax.legend(legend_entries, loc = leg_loc, ncol = 2,
+                   fontsize = legend_fontsize)
     if xlabel is None:
-        plt.xlabel(r'Support size')
+        ax.set_xlabel(r'Support size')
     else:
-        plt.xlabel(xlabel)
+        ax.set_xlabel(xlabel)
     if ylabel is None:
-        plt.ylabel(r'Success rate in %')
+        ax.set_ylabel(r'Success rate in %')
     else:
-        plt.ylabel(ylabel)
+        ax.set_ylabel(ylabel)
     if title is None:
-        plt.title(r'Success rate vs support size')
+        ax.set_title(r'Success rate vs support size')
     else:
-        plt.title(title)
-    plt.ylim([-0.05, 1.05])
+        ax.set_title(title)
     if save_as is not None:
         fig.savefig(save_as)
-    plt.show()
+    if plot_handles is None:
+        ax.set_ylim([-0.05, 1.05])
+        plt.show()
 
 def success_vs_signal_noise(basefolder, identifier, methods,
                             alternative_keys = None, title = None,
@@ -413,7 +448,7 @@ def success_vs_measurement_noise(basefolder, identifier, methods,
                     " results. Keys are: {0}".format(meta_results.keys()))
     fig = plt.figure(figsize = (16,9))
     for j in range(success_rates.shape[1]):
-        plt.semilogx(measurement_SNR, success_rates[:,j], linewidth = 3.0,
+        plt.semilogx(measurement_noises, success_rates[:,j], linewidth = 3.0,
                 linestyle = __linestyle_rotation__[j % len(__linestyle_rotation__)],
                 marker = __marker_rotation__[j % len(__marker_rotation__)],
                 markersize = 15.0)
@@ -421,7 +456,7 @@ def success_vs_measurement_noise(basefolder, identifier, methods,
         legend_entries = [r''+ method.replace('_','').upper() for method in methods]
     plt.legend(legend_entries, loc = leg_loc, ncol = 2, fontsize = 20.0)
     if xlabel is None:
-        plt.xlabel(r'$\sigma^2/c_{\rm{min}}$')
+        plt.xlabel(r'$\sigma^2$')
     else:
         plt.xlabel(xlabel)
     if ylabel is None:

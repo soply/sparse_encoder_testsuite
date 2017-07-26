@@ -21,7 +21,12 @@ def lasso(A, y, real_support, sparsity_level, **kwargs):
             break
     else:
         # Correct support has not been found. Take first entry default sol.
-        support = np.where(binary_coefs[:,potential_candidates[0]])[0]
-        coefs = coefs[:, potential_candidates[0]]
+        try:
+            support = np.where(binary_coefs[:,potential_candidates[0]])[0]
+            coefs = coefs[:, potential_candidates[0]]
+        except IndexError:
+            # Case potential_candidates is empty
+            support = np.zeros(sparsity_level)
+            coefs = np.zeros(sparsity_level)
     elapsed_time = timer() - start
     return coefs, elapsed_time, support

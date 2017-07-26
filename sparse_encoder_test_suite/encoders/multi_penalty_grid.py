@@ -49,22 +49,27 @@ def aux_mp_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
     if beta_scaling == 'linscale':
         beta_range = np.linspace(beta_min, beta_max, n_beta)
     elif beta_scaling == 'logscale':
-        beta_range = np.logspace(beta_min, beta_max, n_beta)
+        beta_range = np.logspace(np.log10(beta_min), np.log10(beta_max), n_beta)
     results = []
     for beta in beta_range:
         B_beta, y_beta = calc_B_y_beta(A, y, U, S, beta)
         # Calculate LAR path
         if method == 'lar':
-            coefs, elapsed_time, support = least_angle_regression(B_beta, y_beta,
-                                                                  sparsity_level)
+            coefs, elapsed_time, support = least_angle_regression(B_beta, y_beta, sparsity_level)
+            results.append(support)
         elif method == 'lasso':
             # Calculate Lasso path
             coefs, elapsed_time, support = lasso(B_beta, y_beta, real_support,
                                                  sparsity_level)
+            results.append(support)
         else:
             raise RuntimeError("Method must be 'lar' or 'lasso'.")
-        if np.array_equal(support, real_support):
-            break
+    # Check if support is in real supports
+    equals = [True if np.array_equal(res, real_support) else False for res in results]
+    if any(equals):
+        support = real_support
+    else:
+        support = results[0] # Dummy support
     # If not break occured, support and coefs from last run are taken as default
     elapsed_time = timer() - start
     return coefs, elapsed_time, support

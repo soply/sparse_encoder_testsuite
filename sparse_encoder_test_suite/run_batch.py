@@ -113,8 +113,12 @@ def run_numerous_one_constellation(problem, results_prefix = None):
         # Creating problem data
         if problem_type == "unmixing":
             A, y, u_real, v_real = create_data_unmixing(problem)
+            signal_to_signal_noise_ratio = np.linalg.norm(A.dot(u_real))/ \
+                                                np.linalg.norm(A.dot(v_real))
         elif problem_type == "pertubation":
             A, y, u_real, E = create_data_pertubation(problem)
+            signal_to_signal_noise_ratio = np.linalg.norm(A.dot(u_real))/ \
+                                                np.linalg.norm(E.dot(u_real))
         else:
             raise RuntimeError("Problem type {0} not recognized. Available {1}".format(
                 problem_type, __available_problem_types__))
@@ -132,7 +136,8 @@ def run_numerous_one_constellation(problem, results_prefix = None):
                                 symmetric_difference=symmetric_diff,
                                 support=support,
                                 success=success,
-                                relative_error=relative_error)
+                                relative_error=relative_error,
+                                ssnr=signal_to_signal_noise_ratio)
     create_meta_results(resultdir)
     if verbosity:
         print_meta_results(resultdir)
@@ -167,6 +172,7 @@ def create_meta_results(folder):
     symmetric_difference = []
     elapsed_time = []
     relative_error = []
+    ssnr = []
     meta_results_tmp = np.zeros(4)
     i = 0
     while os.path.exists(folder + str(i) + "_data.npz"):
@@ -175,12 +181,14 @@ def create_meta_results(folder):
         symmetric_difference.append(datafile['symmetric_difference'])
         elapsed_time.append(datafile['elapsed_time'])
         relative_error.append(datafile['relative_error'])
+        ssnr.append(datafile['ssnr'])
         i += 1
     np.savez_compressed(folder + "meta",
                         elapsed_time=np.array(elapsed_time),
                         symmetric_difference=np.array(symmetric_difference),
                         success=np.array(success),
-                        relative_error=np.array(relative_error))
+                        relative_error=np.array(relative_error),
+                        ssnr=ssnr)
 
 def print_meta_results(folder):
     """ Method to print out the meta results to the terminal. The print-out

@@ -10,10 +10,11 @@ import numpy as np
 
 from ..calculation_utilities.general import relative_error as calc_relative_error
 from cosamp import cosamp
-from iht import iterative_hard_thresholding
+from iht import iterative_hard_thresholding, l1_iterative_hard_thresholding
 from lar import least_angle_regression
 from lasso import lasso
 from mp import matching_pursuit
+from bp import basis_pursuit
 from omp import orthogonal_matching_pursuit
 from romp import regularized_orthogonal_matching_pursuit
 from sp import subspace_pursuit
@@ -21,10 +22,10 @@ from multi_penalty_grid import mp_lasso_grid, mp_lars_grid
 from elastic_net import elastic_net
 
 # Available methods (romp, promp do not work currently)
-__list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "romp", "cosamp",
-                        "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
-                        "pcosamp", "psp", "mp_lasso_grid", "mp_lars_grid",
-                        "enet", "penet"]
+__list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "l1iht", "romp",
+                        "cosamp", "sp", "bp", "pmp", "pomp", "plar", "plasso",
+                        "piht", "pl1iht", "promp", "pcosamp", "psp",
+                        "mp_lasso_grid", "mp_lars_grid", "enet", "penet", 'pbp']
 
 def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
                     **kwargs):
@@ -76,6 +77,8 @@ def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
         result = mp_lasso_grid(A, y, target_support, sparsity_level, **kwargs)
     elif method == 'mp_lars_grid':
         result = mp_lars_grid(A, y, target_support, sparsity_level, **kwargs)
+    elif method == 'bp':
+        result = basis_pursuit(A, y, verbose = verbose, **kwargs)
     elif method == "mp":
         result = matching_pursuit(A, y, sparsity_level)
     elif method == "omp":
@@ -83,6 +86,9 @@ def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
     elif method == "iht":
         result = iterative_hard_thresholding(A, y, sparsity_level,
                                              verbose = verbose)
+    elif method == "l1iht":
+        result = l1_iterative_hard_thresholding(A, y, sparsity_level,
+                                                verbose = verbose)
     elif method == "romp":
         result = regularized_orthogonal_matching_pursuit(A, y, sparsity_level)
     elif method == "cosamp":

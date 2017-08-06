@@ -19,7 +19,7 @@ def iterative_hard_thresholding(A, y, sparsity_level, x0 = None, **kwargs):
     tol = kwargs.get('tol', 1e-4)
     # If support is the same for so many times in a row, we stop the iteration
     tol_n_equal_supports = kwargs.get('n_equal_supports', 20)
-    verbose = True #kwargs.get('verbose', False)
+    verbose = kwargs.get('verbose', False)
 
     starttime = timer()
     x_old = np.ones(A.shape[1])

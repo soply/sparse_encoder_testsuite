@@ -2,10 +2,12 @@
 from timeit import default_timer as timer
 
 import numpy as np
+
+from ..calculation_utilities.general import find_support_minimalSD
 from lasso import lasso
 from lar import least_angle_regression
 
-def mp_lasso_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
+def mp_lasso_grid(A, y, target_support, sparsity_level, beta_min, beta_max,
                   n_beta, beta_scaling, **kwargs):
     """ Performs multi-penalty lasso path algorithm with a grid search on the
     regularization parameter beta. The multi-penalty functional is given by
@@ -17,10 +19,10 @@ def mp_lasso_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
     the solution path. This is done for specific beta's, defined as a grid of
     the given input parameters.
     """
-    return aux_mp_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
+    return aux_mp_grid(A, y, target_support, sparsity_level, beta_min, beta_max,
                     n_beta, beta_scaling, method = 'lasso')
 
-def mp_lars_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
+def mp_lars_grid(A, y, target_support, sparsity_level, beta_min, beta_max,
                   n_beta, beta_scaling, **kwargs):
     """ Performs multi-penalty least angle regression algorithm with a grid
     search on the regularization parameter beta. The multi-penalty functional
@@ -33,10 +35,10 @@ def mp_lars_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
     the solution path. This is done for specific beta's, defined as a grid of
     the given input parameters.
     """
-    return aux_mp_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
+    return aux_mp_grid(A, y, target_support, sparsity_level, beta_min, beta_max,
                     n_beta, beta_scaling, method = 'lar')
 
-def aux_mp_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
+def aux_mp_grid(A, y, target_support, sparsity_level, beta_min, beta_max,
                 n_beta, beta_scaling, method, **kwargs):
     """ Auxiliary method for mp_lasso_grid and mp_lars_grid since both calls are
     almost equal. This is called from both methods to reduce/avoid code
@@ -51,26 +53,26 @@ def aux_mp_grid(A, y, real_support, sparsity_level, beta_min, beta_max,
     elif beta_scaling == 'logscale':
         beta_range = np.logspace(np.log10(beta_min), np.log10(beta_max), n_beta)
     results = []
+    coefs = np.zeros((A.shape[1], 0))
     for beta in beta_range:
         B_beta, y_beta = calc_B_y_beta(A, y, U, S, beta)
-        # Calculate LAR path
         if method == 'lar':
-            coefs, elapsed_time, support = least_angle_regression(B_beta, y_beta, sparsity_level)
-            results.append(support)
+            # Calculate LAR path
+            new_coefs, elapsed_time, support = least_angle_regression(B_beta,
+                                                        y_beta, sparsity_level)
         elif method == 'lasso':
             # Calculate Lasso path
-            coefs, elapsed_time, support = lasso(B_beta, y_beta, real_support,
-                                                 sparsity_level)
-            results.append(support)
+            new_coefs, elapsed_time, support = lasso(B_beta, y_beta,
+                                                     target_support,
+                                                     sparsity_level)
         else:
             raise RuntimeError("Method must be 'lar' or 'lasso'.")
-    # Check if support is in real supports
-    equals = [True if np.array_equal(res, real_support) else False for res in results]
-    if any(equals):
-        support = real_support
-    else:
-        support = results[0] # Dummy support
-    # If not break occured, support and coefs from last run are taken as default
+        coefs = np.concatenate((coefs, np.reshape(new_coefs,
+                                        (new_coefs.shape[0], 1))), axis =1)
+
+    binary_coefs = coefs.astype('bool')
+    support, index = find_support_minimalSD(binary_coefs, target_support)
+    coefs = coefs[:, index]
     elapsed_time = timer() - start
     return coefs, elapsed_time, support
 

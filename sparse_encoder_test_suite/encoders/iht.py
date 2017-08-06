@@ -13,7 +13,7 @@ def iterative_hard_thresholding(A, y, sparsity_level, **kwargs):
     2D numpy array).
     """
     max_iter = kwargs.get('max_iter', 1000)
-    tol = kwargs.get('tol', 1e-6)
+    tol = kwargs.get('tol', 1e-3)
     verbose = kwargs.get('verbose', False)
 
     starttime = timer()

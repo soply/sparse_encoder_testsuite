@@ -125,7 +125,8 @@ def run_numerous_one_constellation(problem, results_prefix = None):
                                                 sparsity_level,
                                                 verbose=verbosity,
                                                 **solver_parameter)
-            symmetric_diff = symmetric_support_difference(support, target_support)
+            symmetric_diff = symmetric_support_difference(support,
+                                                          target_support)
             np.savez_compressed(resultdir + str(i) + "_data.npz",
                                 elapsed_time=elapsed_time,
                                 symmetric_difference=symmetric_diff,

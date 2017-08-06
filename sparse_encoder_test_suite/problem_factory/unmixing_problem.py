@@ -129,7 +129,12 @@ def create_specific_problem_data(n_measurements, n_features, sparsity_level,
     else:
         v_real = np.zeros(A.shape[1])
     if noise_lev_measurements > 0:
-        m_noise = create_noise(A.shape[0], noise_lev_measurements,
-            noise_type_measurements, random_state = random_state)
+        if noise_type_measurements == 'scaled_with_measurements':
+            m_noise = create_noise(A.shape[0], 1.0, 'gaussian',
+                                   random_state = random_state)
+            m_noise *= noise_lev_measurements * np.linalg.norm(y)/np.linalg.norm(m_noise)
+        else:
+            m_noise = create_noise(A.shape[0], noise_lev_measurements,
+                noise_type_measurements, random_state = random_state)
         y = y + m_noise
     return A, y, u_real, v_real

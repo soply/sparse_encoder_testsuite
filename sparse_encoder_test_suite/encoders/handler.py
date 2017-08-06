@@ -18,12 +18,13 @@ from omp import orthogonal_matching_pursuit
 from romp import regularized_orthogonal_matching_pursuit
 from sp import subspace_pursuit
 from multi_penalty_grid import mp_lasso_grid, mp_lars_grid
+from elastic_net import elastic_net
 
 # Available methods (romp, promp do not work currently)
 __list_of_encoders__ = ["mp", "omp", "lar", "lasso", "iht", "romp", "cosamp",
                         "sp", "pmp", "pomp", "plar", "plasso", "piht", "promp",
                         "pcosamp", "psp", "mp_lasso_grid", "mp_lars_grid",
-                        "pmp_lasso_grid", "pmp_lars_grid"]
+                        "enet", "penet"]
 
 def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
                     **kwargs):
@@ -88,14 +89,16 @@ def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
         result = cosamp(A, y, sparsity_level)
     elif method == "sp":
         result = subspace_pursuit(A, y, sparsity_level)
+    elif method == "enet":
+        result = elastic_net(A, y, target_support, sparsity_level, **kwargs)
     elif method in ["pmp", "pomp", "plar", "plasso", "plar", "piht", "promp",
-                    "pcosamp", "psp"]:
+                    "pcosamp", "psp", "penet"]:
         # Calculate preconditioned system
         start_time = timer()
         V_lp, y_new = get_preconditioned_system(A, y)
         # Call method again without p in method name
         result = recover_support(V_lp, y_new, u_real, method[1:],
-                                 sparsity_level, verbose=verbose)
+                                 sparsity_level, verbose=verbose, **kwargs)
         elapsed_time = start_time - timer()  #  Replace time with total time
         return result[0], result[1], result[2], elapsed_time, result[4]
     else:
@@ -114,11 +117,12 @@ def recover_support(A, y, u_real, method, sparsity_level, verbose=True,
     return success, support, target_support, elapsed_time, relative_error
 
 
-def get_preconditioned_system(A, y):
+def get_preconditioned_system(A, y, S_tol = 1e-13):
     """ Transforms given data into a preconditioned system by the Puffer
-    transformation. The Puffer transformation is given as F = U D^-1 U^T where
-    A = UDV^T is the SVD of A. The transformed data is given by
-    FA, Fy.
+    transformation. The Puffer transformation is given as F = U D^dagger U^T where
+    A = UDV^T is the SVD of A and D^dagger is equal to D^-1 if dii > 0 and 0
+    else. The transformed data is given by FA, Fy (we will skip the leading U,
+    since it doesn't influence the solutions but saves computational time)
 
     Parameters
     -------------
@@ -127,6 +131,9 @@ def get_preconditioned_system(A, y):
 
     y : np.array, shape (n_measurements)
         Vector of measurements.
+
+    S_tol : float
+        Singular values below this value will be set to zero, not inverted.
 
     Returns
     -------------
@@ -138,8 +145,13 @@ def get_preconditioned_system(A, y):
         irrepresentable condition." arXiv preprint arXiv:1208.5584 (2012).
     """
     U, S, V = np.linalg.svd(A, full_matrices = False)
-    y_new = np.diag(1.0 / S).dot(U.T).dot(y)
-    return V, y_new
+    new_A = np.linalg.pinv(A)
+    S[S < S_tol] = 0.0
+    S[S > 0] = 1.0/S[S > 0]
+    y_new = np.diag(S).dot(U.T).dot(y)
+    S[S > 0] = 1.0
+    A_new = np.diag(S).dot(V)
+    return A_new, y_new
 
 
 def check_method_validity(method, verbose = False):

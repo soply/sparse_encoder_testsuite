@@ -131,9 +131,31 @@ def run_numerous_one_constellation(problem, results_prefix = None):
                                                 **solver_parameter)
             symmetric_diff = symmetric_support_difference(support,
                                                           target_support)
+            symmetric_diff_fixed_size = symmetric_diff + (len(target_support) - \
+                                                            len(support))
             np.savez_compressed(resultdir + str(i) + "_data.npz",
                                 elapsed_time=elapsed_time,
                                 symmetric_difference=symmetric_diff,
+                                symmetric_diff_fixed_size=symmetric_diff_fixed_size,
+                                support=support,
+                                success=success,
+                                relative_error=relative_error,
+                                ssnr=signal_to_signal_noise_ratio)
+        else:
+            # FIXME: Only for repairing symmetric differences
+            datafile = np.load(resultdir + str(i) + "_data.npz")
+            elapsed_time=datafile['elapsed_time']
+            symmetric_difference=datafile['symmetric_difference']
+            support=datafile['support']
+            success=datafile['success']
+            relative_error=datafile['relative_error']
+            ssnr=signal_to_signal_noise_ratio
+            symmetric_diff_fixed_size= symmetric_difference + (len(target_support) - \
+                                                            len(support))
+            np.savez_compressed(resultdir + str(i) + "_data.npz",
+                                elapsed_time=elapsed_time,
+                                symmetric_difference=symmetric_difference,
+                                symmetric_diff_fixed_size=symmetric_diff_fixed_size,
                                 support=support,
                                 success=success,
                                 relative_error=relative_error,
@@ -170,6 +192,7 @@ def create_meta_results(folder):
     """
     success = []
     symmetric_difference = []
+    symmetric_diff_fixed_size = []
     elapsed_time = []
     relative_error = []
     ssnr = []
@@ -179,6 +202,7 @@ def create_meta_results(folder):
         datafile = np.load(folder + str(i) + "_data.npz")
         success.append(datafile['success'])
         symmetric_difference.append(datafile['symmetric_difference'])
+        symmetric_diff_fixed_size.append(datafile['symmetric_diff_fixed_size'])
         elapsed_time.append(datafile['elapsed_time'])
         relative_error.append(datafile['relative_error'])
         ssnr.append(datafile['ssnr'])
@@ -186,6 +210,7 @@ def create_meta_results(folder):
     np.savez_compressed(folder + "meta",
                         elapsed_time=np.array(elapsed_time),
                         symmetric_difference=np.array(symmetric_difference),
+                        symmetric_diff_fixed_size=np.array(symmetric_diff_fixed_size),
                         success=np.array(success),
                         relative_error=np.array(relative_error),
                         ssnr=ssnr)

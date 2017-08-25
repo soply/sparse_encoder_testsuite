@@ -36,11 +36,12 @@ def iterative_hard_thresholding(A, y, sparsity_level, x0 = None, **kwargs):
     iteration = 0
     current_support = np.where(x_new)[0]
     n_equal_supports = 0
+    AtA = A.T.dot(A)
     while relative_error > tol and iteration < max_iter and \
             n_equal_supports < tol_n_equal_supports:
         iteration += 1
         x_old = x_new
-        x_new = x_old + Aty - A.T.dot(A).dot(x_old)
+        x_new = x_old + Aty - AtA.dot(x_old)
         ind = np.argpartition(np.abs(x_new), -sparsity_level)[-sparsity_level:]
         mask = np.zeros(A.shape[1]).astype("bool")
         mask[ind] = True

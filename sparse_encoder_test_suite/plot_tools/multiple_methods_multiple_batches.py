@@ -151,10 +151,10 @@ def symmdiff_vs_xaxis(basefolder, identifier, methods, xaxis,
         ax.set_title(r'Symmetric difference vs number of features')
     else:
         ax.set_title(title)
+    ax.set_ylim([-0.05, np.max(avg_symm_diff) + 1.0])
     if save_as is not None:
         fig.savefig(save_as)
     if plot_handles is None:
-        ax.set_ylim([-0.05, np.max(avg_symm_diff) + 1.0])
         plt.show()
 
 
@@ -244,6 +244,16 @@ def success_vs_xaxis(basefolder, identifier, methods, xaxis, xlabel,
     with open(folder_names[methods[0]] + 'log.txt') as data_file:
         problem = json.load(data_file)
     xvals = problem[xaxis]
+    if xvals in ['sparsity_level', 'noise_lev_measurements']:
+        xvals = problem[xaxis]
+    elif xvals == 'noise_lev_signal':
+        signal_noise = np.array(problem['noise_lev_signal']).astype('float')
+        smallest_signal_entry = problem['smallest_signal']
+        xvals = smallest_signal_entry/signal_noise
+    elif xvals == 'signal_gap':
+        largest_signal_entry = np.array(problem['largest_signal']).astype('float')
+        smallest_signal_entry = problem['smallest_signal']
+        xvals = largest_signal_entry/smallest_signal_entry
     success_rates = np.zeros((len(xvals), len(methods)))
     for i, method in enumerate(methods):
         for j, xval in enumerate(xvals):
@@ -293,10 +303,10 @@ def success_vs_xaxis(basefolder, identifier, methods, xaxis, xlabel,
         ax.set_ylabel(ylabel)
     if title is not None:
         ax.set_title(title)
+    ax.set_ylim([-0.05, 1.05])
     if save_as is not None:
         fig.savefig(save_as)
     if plot_handles is None:
-        ax.set_ylim([-0.05, 1.05])
         plt.show()
 
 
@@ -306,6 +316,7 @@ def success_vs_sparsity_level(basefolder, identifier, methods,
                               leg_loc = 'lower right', legend_entries = None,
                               legend_cols = 2, legend_fontsize = 20,
                               colors = None,
+                              xscaling = 'linear',
                               plot_handles = None):
     """ Creates a plot success rate vs sparsity level plot. Sparsity level is
     on x axis and success rate on y. The method akes a list of methods as an
@@ -341,6 +352,9 @@ def success_vs_sparsity_level(basefolder, identifier, methods,
     xlabel, optional : python string
         Optional xlabel of the plot.
 
+    xscaling : python string either 'log' or 'linear'
+        Scaling of x axis.
+
     ylabel, optional : python string
         Optinal ylabel of the plot.
 
@@ -371,71 +385,18 @@ def success_vs_sparsity_level(basefolder, identifier, methods,
             fig, ax = plt.figure()
             plot_handles = (fig, ax)
     """
-    folder_names = {}
-    for method in methods:
-        folder_names[method] = basefolder + "/" + method + "_" + identifier + "/"
-    # Load problem data
-    with open(folder_names[methods[0]] + 'log.txt') as data_file:
-        problem = json.load(data_file)
-    sparsity_levels = problem['sparsity_level']
-    success_rates = np.zeros((len(sparsity_levels), len(methods)))
-    for i, method in enumerate(methods):
-        for j, sparsity_level in enumerate(sparsity_levels):
-            meta_results = np.load(folder_names[method] + str(j) +\
-                                      "/meta.npz")
-            num_tests = problem['num_tests']
-            if alternative_keys is not None:
-                success_rates[j, i] = np.sum(meta_results[alternative_keys[i]])/ \
-                                             float(num_tests)
-            elif "success" in meta_results.keys():
-                success_rates[j, i] = np.sum(meta_results["success"])/ \
-                                                    float(num_tests)
-            elif "tiling_contains_real" in meta_results.keys():
-                # Key for our multi-penalty framework
-                success_rates[j, i] = np.sum(meta_results["tiling_contains_real"])/ \
-                                                    float(num_tests)
-            else:
-                raise RuntimeError("Can not find key for success rate in" + \
-                    " results. Keys are: {0}".format(meta_results.keys()))
-    if plot_handles is None:
-        fig = plt.figure(figsize = (16,9))
-        ax = plt.gca()
-        cycle_offset = 0
-    else:
-        fig, ax = plot_handles
-        cycle_offset = len(ax.lines)
-    if colors is None:
-        colors = __color_rotation__
-
-    for j in range(success_rates.shape[1]):
-        ax.plot(sparsity_levels, success_rates[:,j], linewidth = 3.0,
-                c = colors[(j+5+cycle_offset) % len(colors)],
-                linestyle = __linestyle_rotation__[(j + +cycle_offset) % len(__linestyle_rotation__)],
-                marker = __marker_rotation__[(j + +cycle_offset) % len(__marker_rotation__)],
-                markersize = 15.0)
-    if legend_entries is None:
-        ax.legend(methods, loc = leg_loc, ncol = 2,
-                   fontsize = legend_fontsize)
-    else:
-        ax.legend(legend_entries, loc = leg_loc, ncol = 2,
-                   fontsize = legend_fontsize)
     if xlabel is None:
-        ax.set_xlabel(r'Support size')
-    else:
-        ax.set_xlabel(xlabel)
-    if ylabel is None:
-        ax.set_ylabel(r'Success rate in %')
-    else:
-        ax.set_ylabel(ylabel)
-    if title is None:
-        ax.set_title(r'Success rate vs support size')
-    else:
-        ax.set_title(title)
-    if save_as is not None:
-        fig.savefig(save_as)
-    if plot_handles is None:
-        ax.set_ylim([-0.05, 1.05])
-        plt.show()
+        xlabel = r'Support size'
+    success_vs_xaxis(basefolder, identifier, methods, 'sparsity_level', xlabel,
+                      alternative_keys = alternative_keys, title = title,
+                      ylabel = ylabel, save_as = save_as,
+                      leg_loc = leg_loc, legend_entries = legend_entries,
+                      legend_cols = legend_cols,
+                      legend_fontsize = legend_fontsize,
+                      xscaling = xscaling,
+                      colors = colors,
+                      plot_handles = plot_handles)
+
 
 def success_vs_signal_noise(basefolder, identifier, methods,
                             alternative_keys = None, title = None,
@@ -489,59 +450,13 @@ def success_vs_signal_noise(basefolder, identifier, methods,
         List of strings of the same size as methods (if given), yielding legend
         entries.
     """
-    folder_names = {}
-    for method in methods:
-        folder_names[method] = basefolder + "/" + method + "_" + identifier + "/"
-    # Load problem data
-    with open(folder_names[methods[0]] + 'log.txt') as data_file:
-        problem = json.load(data_file)
-    signal_noise = np.array(problem['noise_lev_signal']).astype('float')
-    smallest_signal_entry = problem['smallest_signal']
-    signal_to_noise_ratios = smallest_signal_entry/signal_noise
-    success_rates = np.zeros((len(signal_to_noise_ratios), len(methods)))
-    for i, method in enumerate(methods):
-        for j in range(len(signal_to_noise_ratios)):
-            meta_results = np.load(folder_names[method] + str(j) +\
-                                      "/meta.npz")
-            num_tests = problem['num_tests']
-            if alternative_keys is not None:
-                success_rates[j, i] = np.sum(meta_results[alternative_keys[i]])/ \
-                                             float(num_tests)
-            elif "success" in meta_results.keys():
-                success_rates[j, i] = np.sum(meta_results["success"])/ \
-                                                    float(num_tests)
-            elif "tiling_contains_real" in meta_results.keys():
-                # Key for our multi-penalty framework
-                success_rates[j, i] = np.sum(meta_results["tiling_contains_real"])/ \
-                                                    float(num_tests)
-            else:
-                raise RuntimeError("Can not find key for success rate in" + \
-                    " results. Keys are: {0}".format(meta_results.keys()))
-    fig = plt.figure(figsize = (16,9))
-    for j in range(success_rates.shape[1]):
-        plt.semilogx(signal_to_noise_ratios, success_rates[:,j], linewidth = 3.0,
-                linestyle = __linestyle_rotation__[j % len(__linestyle_rotation__)],
-                marker = __marker_rotation__[j % len(__marker_rotation__)],
-                markersize = 15.0)
-    if legend_entries is None:
-        legend_entries = [r''+ method.replace('_','').upper() for method in methods]
-    plt.legend(legend_entries, loc = leg_loc, ncol = 2, fontsize = 20.0)
     if xlabel is None:
-        plt.xlabel(r'SNR (smallest signal entry/signal noise)')
-    else:
-        plt.xlabel(xlabel)
-    if ylabel is None:
-        plt.ylabel(r'Success rate in %')
-    else:
-        plt.ylabel(ylabel)
-    if title is None:
-        plt.title(r'Success rate vs SNR')
-    else:
-        plt.title(title)
-    plt.ylim([-0.05, 1.05])
-    if save_as is not None:
-        fig.savefig(save_as)
-    plt.show()
+        xlabel = r'Signal noise'
+    success_vs_xaxis(basefolder, identifier, methods, 'noise_lev_signal', xlabel,
+                      alternative_keys = alternative_keys, title = title,
+                      ylabel = ylabel, save_as = save_as,
+                      leg_loc = leg_loc, legend_entries = legend_entries)
+
 
 def success_vs_signal_gap(basefolder, identifier, methods, alternative_keys = None,
                           title = None, xlabel = None, ylabel = None,
@@ -596,59 +511,12 @@ def success_vs_signal_gap(basefolder, identifier, methods, alternative_keys = No
         List of strings of the same size as methods (if given), yielding legend
         entries.
     """
-    folder_names = {}
-    for method in methods:
-        folder_names[method] = basefolder + "/" + method + "_" + identifier + "/"
-    # Load problem data
-    with open(folder_names[methods[0]] + 'log.txt') as data_file:
-        problem = json.load(data_file)
-    largest_signal_entry = np.array(problem['largest_signal']).astype('float')
-    smallest_signal_entry = problem['smallest_signal']
-    signal_gaps = largest_signal_entry/smallest_signal_entry
-    success_rates = np.zeros((len(signal_gaps), len(methods)))
-    for i, method in enumerate(methods):
-        for j in range(len(signal_gaps)):
-            meta_results = np.load(folder_names[method] + str(j) +\
-                                      "/meta.npz")
-            num_tests = problem['num_tests']
-            if alternative_keys is not None:
-                success_rates[j, i] = np.sum(meta_results[alternative_keys[i]])/ \
-                                             float(num_tests)
-            elif "success" in meta_results.keys():
-                success_rates[j, i] = np.sum(meta_results["success"])/ \
-                                                    float(num_tests)
-            elif "tiling_contains_real" in meta_results.keys():
-                # Key for our multi-penalty framework
-                success_rates[j, i] = np.sum(meta_results["tiling_contains_real"])/ \
-                                                    float(num_tests)
-            else:
-                raise RuntimeError("Can not find key for success rate in" + \
-                    " results. Keys are: {0}".format(meta_results.keys()))
-    fig = plt.figure(figsize = (16,9))
-    for j in range(success_rates.shape[1]):
-        plt.semilogx(signal_gaps, success_rates[:,j], linewidth = 3.0,
-                linestyle = __linestyle_rotation__[j % len(__linestyle_rotation__)],
-                marker = __marker_rotation__[j % len(__marker_rotation__)],
-                markersize = 15.0)
-    if legend_entries is None:
-        legend_entries = [r''+ method.replace('_','').upper() for method in methods]
-    plt.legend(legend_entries, loc = leg_loc, ncol = 2, fontsize = 20.0)
     if xlabel is None:
-        plt.xlabel(r'Signal gap (Largest absoulute entry/Smallest absolute entry)')
-    else:
-        plt.xlabel(xlabel)
-    if ylabel is None:
-        plt.ylabel(r'Success rate in %')
-    else:
-        plt.ylabel(ylabel)
-    if title is None:
-        plt.title(r'Success rate vs Signal gap')
-    else:
-        plt.title(title)
-    plt.ylim([-0.05, 1.05])
-    if save_as is not None:
-        fig.savefig(save_as)
-    plt.show()
+        xlabel = r'Signal gap'
+    success_vs_xaxis(basefolder, identifier, methods, 'signal_gap', xlabel,
+                     alternative_keys = alternative_keys, title = title,
+                     ylabel = ylabel, save_as = save_as,
+                     leg_loc = leg_loc, legend_entries = legend_entries)
 
 
 def success_vs_measurement_noise(basefolder, identifier, methods,
@@ -704,60 +572,14 @@ def success_vs_measurement_noise(basefolder, identifier, methods,
         List of strings of the same size as methods (if given), yielding legend
         entries.
     """
-    folder_names = {}
-    for method in methods:
-        folder_names[method] = basefolder + "/" + method + "_" + identifier + "/"
-    # Load problem data
-    with open(folder_names[methods[0]] + 'log.txt') as data_file:
-        problem = json.load(data_file)
-    smallest_signal = problem['smallest_signal']
-    measurement_noises = np.array(problem['noise_lev_measurements'])
-    measurement_SNR = measurement_noises/smallest_signal
-    success_rates = np.zeros((len(measurement_SNR), len(methods)))
-    for i, method in enumerate(methods):
-        for j in range(len(measurement_SNR)):
-            meta_results = np.load(folder_names[method] + str(j) +\
-                                      "/meta.npz")
-            num_tests = problem['num_tests']
-            if alternative_keys is not None:
-                success_rates[j, i] = np.sum(meta_results[alternative_keys[i]])/ \
-                                             float(num_tests)
-            elif "success" in meta_results.keys():
-                success_rates[j, i] = np.sum(meta_results["success"])/ \
-                                                    float(num_tests)
-            elif "tiling_contains_real" in meta_results.keys():
-                # Key for our multi-penalty framework
-                success_rates[j, i] = np.sum(meta_results["tiling_contains_real"])/ \
-                                                    float(num_tests)
-            else:
-                raise RuntimeError("Can not find key for success rate in" + \
-                    " results. Keys are: {0}".format(meta_results.keys()))
-    fig = plt.figure(figsize = (16,9))
-    for j in range(success_rates.shape[1]):
-        plt.semilogx(measurement_noises, success_rates[:,j], linewidth = 3.0,
-                linestyle = __linestyle_rotation__[j % len(__linestyle_rotation__)],
-                marker = __marker_rotation__[j % len(__marker_rotation__)],
-                markersize = 15.0)
-    if legend_entries is None:
-        legend_entries = [r''+ method.replace('_','').upper() for method in methods]
-    plt.legend(legend_entries, loc = leg_loc, ncol = 2, fontsize = 20.0)
     if xlabel is None:
-        plt.xlabel(r'$\sigma^2$')
-    else:
-        plt.xlabel(xlabel)
-    if ylabel is None:
-        plt.ylabel(r'Success rate in %')
-    else:
-        plt.ylabel(ylabel)
-    if title is None:
-        plt.title(r'Success rate vs measurement noise level $\sigma^2$')
-    else:
-        plt.title(title)
-    plt.xlim([np.min(measurement_noises)-1e-5, np.max(measurement_noises)+1e-5])
-    plt.ylim([-0.05, 1.05])
-    if save_as is not None:
-        fig.savefig(save_as)
-    plt.show()
+        xlabel = r'Measurement noise'
+    success_vs_xaxis(basefolder, identifier, methods, 'noise_lev_measurements',
+                      xlabel,
+                      alternative_keys = alternative_keys, title = title,
+                      ylabel = ylabel, save_as = save_as,
+                      leg_loc = leg_loc, legend_entries = legend_entries,
+                      xscaling = 'linear')
 
 
 def time_vs_xaxis(basefolder, identifier, methods, xaxis, xlabel,
